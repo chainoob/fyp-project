@@ -223,7 +223,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                   Expanded(
                     flex: 1,
                     child: DropdownButtonFormField<String>(
-                      value: _selectedType,
+                      initialValue: _selectedType,
                       dropdownColor: AppTheme.surface,
                       isExpanded: true,
                       decoration: const InputDecoration(labelText: "Type"),
