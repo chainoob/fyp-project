@@ -27,7 +27,7 @@ void main() {
     );
 
     // Verify Login Screen elements (Matches "University Dark" theme)
-    expect(find.text('Smart Campus'), findsOneWidget);
+    expect(find.text('SmartMeter'), findsOneWidget);
     expect(find.text('Energy Management System'), findsOneWidget);
     expect(find.text('SECURE LOGIN'), findsOneWidget);
 
@@ -35,7 +35,7 @@ void main() {
     expect(find.byType(TextField), findsNWidgets(2));
 
     // Attempt to login
-    await tester.enterText(find.widgetWithText(TextField, 'University Email'), 'test@uni.edu');
+    await tester.enterText(find.widgetWithText(TextField, 'Email or Matric Number'), 'admin@gmail.com');
     await tester.enterText(find.widgetWithText(TextField, 'Password'), 'password');
     await tester.tap(find.text('SECURE LOGIN'));
     

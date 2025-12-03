@@ -18,7 +18,7 @@ class ProfileScreen extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: const LinearGradient(colors: [AppTheme.navyBlue, Color(0xFF1A237E)]),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Row(
             children: [

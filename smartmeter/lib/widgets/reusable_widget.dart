@@ -44,7 +44,7 @@ class ApplianceCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: CircleAvatar(backgroundColor: statusColor.withOpacity(0.1), child: Icon(Icons.power, color: statusColor)),
+        leading: CircleAvatar(backgroundColor: statusColor.withValues(alpha: 0.1), child: Icon(Icons.power, color: statusColor)),
         title: Text(app.name),
         subtitle: Text("${app.wattage}W • ${app.status.toUpperCase()}"),
         trailing: Icon(statusIcon, color: statusColor, size: 20),

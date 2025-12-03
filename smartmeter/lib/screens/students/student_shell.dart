@@ -26,7 +26,7 @@ class _StudentShellState extends State<StudentShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _idx == 3 ? null : AppBar(title: Text(['Dashboard', 'Analytics', 'My Devices'][_idx])),
+      appBar: _idx == 3 ? null : AppBar(title: Text(['Dashboard', 'Analytics', 'Appliances'][_idx])),
       body: _pages[_idx],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _idx,
@@ -34,7 +34,7 @@ class _StudentShellState extends State<StudentShell> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.dashboard_outlined), label: 'Home'),
           NavigationDestination(icon: Icon(Icons.insights), label: 'Insights'),
-          NavigationDestination(icon: Icon(Icons.devices), label: 'Devices'),
+          NavigationDestination(icon: Icon(Icons.devices), label: 'Appliances'),
           NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),
@@ -55,7 +55,7 @@ class StudentDashboard extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: const LinearGradient(colors: [AppTheme.navyBlue, Color(0xFF5C6BC0)]),
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

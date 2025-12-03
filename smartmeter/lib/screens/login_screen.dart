@@ -10,14 +10,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailCtrl = TextEditingController();
+  final _emailMatricCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _isLoading = false;
 
   void _handleLogin() async {
     setState(() => _isLoading = true);
     try {
-      await context.read<AuthProvider>().login(_emailCtrl.text, _passCtrl.text);
+      await context.read<AuthProvider>().login(_emailMatricCtrl.text, _passCtrl.text);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
     } finally {
@@ -36,13 +36,13 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const Icon(Icons.school, size: 80, color: AppTheme.navyBlue),
               const SizedBox(height: 24),
-              const Text("Smart Campus", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const Text("SmartMeter", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               Text("Energy Management System", style: TextStyle(color: Colors.grey[400])),
               const SizedBox(height: 48),
               
               TextField(
-                controller: _emailCtrl,
-                decoration: const InputDecoration(labelText: "University Email", prefixIcon: Icon(Icons.email_outlined)),
+                controller: _emailMatricCtrl,
+                decoration: const InputDecoration(labelText: "Email or Matric Number", prefixIcon: Icon(Icons.email_outlined)),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? const CircularProgressIndicator()
                 : SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(onPressed: _handleLogin, child: const Text("SECURE LOGIN")),
+                    child: ElevatedButton(onPressed: _handleLogin, child: const Text("login")),
                   ),
             ],
           ),

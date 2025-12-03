@@ -56,7 +56,6 @@ class VerificationQueue extends StatelessWidget {
           children: const [
             Icon(Icons.check_circle_outline, size: 64, color: AppTheme.ecoTeal),
             SizedBox(height: 16),
-            Text("All Caught Up!", style: TextStyle(fontSize: 18)),
             Text("No appliances waiting for verification.", style: TextStyle(color: Colors.grey)),
           ],
         ),
@@ -78,7 +77,7 @@ class VerificationQueue extends StatelessWidget {
                 Row(children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: Colors.amber.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                    decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
                     child: const Text("PENDING REVIEW", style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                   const Spacer(),
