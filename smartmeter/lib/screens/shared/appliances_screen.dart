@@ -191,7 +191,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.qr_code_scanner, color: AppTheme.ecoTeal.withOpacity(0.7), size: 32),
+                    Icon(Icons.qr_code_scanner, color: AppTheme.ecoTeal.withValues(alpha: 0.7), size: 32),
                     const SizedBox(height: 12),
                     const Text("Quick Scan (Coming Soon)", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
@@ -277,7 +277,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                   onPressed: _isSubmitting ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.navyBlue,
-                    disabledBackgroundColor: AppTheme.navyBlue.withOpacity(0.5),
+                    disabledBackgroundColor: AppTheme.navyBlue.withValues(alpha: 0.5),
                   ),
                   child: _isSubmitting 
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
