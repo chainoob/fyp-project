@@ -193,7 +193,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                   children: [
                     Icon(Icons.qr_code_scanner, color: AppTheme.ecoTeal.withValues(alpha: 0.7), size: 32),
                     const SizedBox(height: 12),
-                    const Text("Quick Scan (Coming Soon)", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
+                    const Text("Quick Scan", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
                     const Text(
                       "Automatically detect wattage from appliance labels.",

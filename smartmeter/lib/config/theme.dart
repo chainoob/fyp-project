@@ -17,7 +17,6 @@ class AppTheme {
         primary: navyBlue,
         secondary: ecoTeal,
         surface: surface,
-        background: background,
       ),
       scaffoldBackgroundColor: background,
       cardTheme: CardThemeData(
@@ -25,7 +24,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.white.withOpacity(0.08)),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
         ),
       ),
       appBarTheme: const AppBarTheme(

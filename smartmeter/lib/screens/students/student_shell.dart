@@ -47,6 +47,10 @@ class StudentDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const String estimatedBill = "\$ --.--";
+    const String currentLoad = "-- W";
+    const String carbonFootprint = "-- kg";
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -62,11 +66,23 @@ class StudentDashboard extends StatelessWidget {
             children: [
               const Text("Current Bill Estimate", style: TextStyle(color: Colors.white70)),
               const SizedBox(height: 8),
-              const Text("\$45.20", style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Text(estimatedBill, style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.white)),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.white54, size: 16),
+                  const SizedBox(width: 4),
+                  const Text("Analysis pending...", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                ],
+              ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppTheme.navyBlue),
-                onPressed: () {}, 
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppTheme.navyBlue,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
+                ),
+                onPressed: () {},
                 icon: const Icon(Icons.analytics_outlined, size: 18),
                 label: const Text("ANALYZE USAGE"),
               )
@@ -74,13 +90,14 @@ class StudentDashboard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
+
         const Text("Real-Time Metrics", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
         const SizedBox(height: 12),
         const Row(
           children: [
-            Expanded(child: MetricTile(label: "Current Load", value: "1.2 kW", icon: Icons.electric_bolt, color: Colors.amber)),
+            Expanded(child: MetricTile(label: "Current Load", value: currentLoad, icon: Icons.electric_bolt, color: Colors.amber)),
             SizedBox(width: 16),
-            Expanded(child: MetricTile(label: "Carbon Footprint", value: "4.5 kg", icon: Icons.co2, color: AppTheme.ecoTeal)),
+            Expanded(child: MetricTile(label: "Carbon Footprint", value: carbonFootprint, icon: Icons.co2, color: AppTheme.ecoTeal)),
           ],
         ),
       ],
