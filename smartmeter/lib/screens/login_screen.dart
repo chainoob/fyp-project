@@ -10,16 +10,36 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailMatricCtrl = TextEditingController();
+  final _idCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _isLoading = false;
 
+  static const String _universityDomain = "@student.uthm.edu.my";
+
   void _handleLogin() async {
     setState(() => _isLoading = true);
+
+    //Check if it's an ID or Email
+    String input = _idCtrl.text.trim();
+    String emailToUse = input;
+
+    if (!input.contains('@')) {
+      emailToUse = "$input$_universityDomain";
+    }
+
     try {
-      await context.read<AuthProvider>().login(_emailMatricCtrl.text, _passCtrl.text);
+      await context.read<AuthProvider>().login(emailToUse, _passCtrl.text);
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+      if (mounted) {
+        // Show clearer error message
+        String message = "Login failed";
+        if (e.toString().contains("user-not-found")) {
+          message = "ID/Email not found. Did you register?";
+        } else if (e.toString().contains("wrong-password")) {
+          message = "Incorrect password";
+        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -39,10 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const Text("SmartMeter", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               Text("Energy Management System", style: TextStyle(color: Colors.grey[400])),
               const SizedBox(height: 48),
-              
+
+              // Updated Input Decoration
               TextField(
-                controller: _emailMatricCtrl,
-                decoration: const InputDecoration(labelText: "Email or Matric Number", prefixIcon: Icon(Icons.email_outlined)),
+                controller: _idCtrl,
+                decoration: const InputDecoration(
+                    labelText: "Matric Number or Email",
+                    prefixIcon: Icon(Icons.badge_outlined)
+                ),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -51,13 +75,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const InputDecoration(labelText: "Password", prefixIcon: Icon(Icons.lock_outline)),
               ),
               const SizedBox(height: 32),
-              
-              _isLoading 
-                ? const CircularProgressIndicator()
-                : SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(onPressed: _handleLogin, child: const Text("login")),
-                  ),
+
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _handleLogin,
+                  child: const Text("SECURE LOGIN"),
+                ),
+              ),
             ],
           ),
         ),

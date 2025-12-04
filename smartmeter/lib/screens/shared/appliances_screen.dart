@@ -262,7 +262,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                       focusNode: _roomFocus,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
-                      decoration: const InputDecoration(labelText: "Location", hintText: "e.g. Bed A"),
+                      decoration: const InputDecoration(labelText: "Location", hintText: "e.g. A123A"),
                       validator: (v) => v == null || v.isEmpty ? "Required" : null,
                     ),
                   ),
