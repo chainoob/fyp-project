@@ -67,7 +67,8 @@ class ApplianceProvider extends ChangeNotifier {
 
   Future<void> add(String userId, String name, String type, int watts, String room) async {
     final app = Appliance(
-      id: '', 
+      id: '',
+      ownerId:'',
       name: name,
       type: type,
       wattage: watts,

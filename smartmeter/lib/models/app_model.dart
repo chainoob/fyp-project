@@ -37,15 +37,17 @@ class UserProfile {
 // --- APPLIANCE MODEL ---
 class Appliance {
   final String id;
+  final String ownerId;
   final String name;
   final String type;
   final int wattage;
-  final String status; // 'pending', 'active', 'rejected'
+  final String status;
   final String? room;
   final DateTime? verificationDate;
 
   const Appliance({
     required this.id,
+    required this.ownerId,
     required this.name,
     required this.type,
     required this.wattage,
@@ -68,8 +70,12 @@ class Appliance {
 
   factory Appliance.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+
+    final String parentUserId = doc.reference.parent.parent?.id ?? '';
+
     return Appliance(
       id: doc.id,
+      ownerId: parentUserId, // Store the owner's ID
       name: data['name'] ?? 'Unknown Device',
       type: data['type'] ?? 'other',
       wattage: data['wattage'] ?? 0,

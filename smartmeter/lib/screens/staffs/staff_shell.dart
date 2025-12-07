@@ -12,11 +12,18 @@ class StaffShell extends StatefulWidget {
 
 class _StaffShellState extends State<StaffShell> {
   int _idx = 0;
-  final _pages = const [StaffDashboard(), VerificationQueue(), Placeholder(), ProfileScreen()];
+
+  final _pages = const [
+    StaffDashboard(),
+    VerificationQueue(),
+    Placeholder(),
+    ProfileScreen()
+  ];
 
   @override
   void initState() {
     super.initState();
+    // Subscribe to the global pending queue via the provider
     context.read<ApplianceProvider>().subscribeToQueue();
   }
 
@@ -39,7 +46,11 @@ class _StaffShellState extends State<StaffShell> {
   }
 }
 
-class StaffDashboard extends StatelessWidget { const StaffDashboard({super.key}); @override Widget build(BuildContext context) => const Center(child: Text("Campus Overview")); }
+class StaffDashboard extends StatelessWidget {
+  const StaffDashboard({super.key});
+  @override
+  Widget build(BuildContext context) => const Center(child: Text("Campus Overview"));
+}
 
 class VerificationQueue extends StatelessWidget {
   const VerificationQueue({super.key});
@@ -47,16 +58,18 @@ class VerificationQueue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ApplianceProvider>();
-    final pending = provider.appliances; 
+    final pending = provider.appliances;
 
     if (pending.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.check_circle_outline, size: 64, color: AppTheme.ecoTeal),
-            SizedBox(height: 16),
-            Text("No appliances waiting for verification.", style: TextStyle(color: Colors.grey)),
+          children: [
+            Icon(Icons.check_circle_outline, size: 64, color: AppTheme.ecoTeal.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            const Text("All Caught Up!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text("No appliances waiting for verification.", style: TextStyle(color: Colors.grey)),
           ],
         ),
       );
@@ -74,25 +87,48 @@ class VerificationQueue extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
-                    child: const Text("PENDING REVIEW", style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
-                  ),
-                  const Spacer(),
-                  Text(app.type.toUpperCase(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                ]),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: Colors.amber.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                      child: const Text("PENDING REVIEW", style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+                    ),
+                    const Spacer(),
+                    Text(app.type.toUpperCase(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  ],
+                ),
                 const SizedBox(height: 12),
+
                 Text(app.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
                 Text("${app.wattage} Watts • ${app.room ?? 'Unknown Room'}", style: const TextStyle(color: Colors.grey)),
+
                 const SizedBox(height: 16),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(onPressed: () {}, child: const Text("REJECT", style: TextStyle(color: Colors.red))),
+                    TextButton(
+                      onPressed: () {
+                        provider.reject(app.ownerId, app.id);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Application Rejected")));
+                      },
+                      child: const Text("REJECT", style: TextStyle(color: Colors.red)),
+                    ),
                     const SizedBox(width: 8),
-                    ElevatedButton(onPressed: () {}, style: ElevatedButton.styleFrom(backgroundColor: AppTheme.ecoTeal), child: const Text("APPROVE")),
+                    ElevatedButton(
+                      onPressed: () {
+
+                        provider.approve(app.ownerId, app.id);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text("Device Approved"),
+                          backgroundColor: AppTheme.ecoTeal,
+                        ));
+                      },
+                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.ecoTeal),
+                      child: const Text("APPROVE"),
+                    ),
                   ],
                 )
               ],
