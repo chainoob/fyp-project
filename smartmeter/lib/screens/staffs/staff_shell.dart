@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smartmeter/controllers/provider.dart';
 import '../../config/theme.dart';
 import '../shared/profile_screen.dart';
+import 'package:smartmeter/models/app_model.dart';
 
 class StaffShell extends StatefulWidget {
   const StaffShell({super.key});
@@ -23,7 +24,6 @@ class _StaffShellState extends State<StaffShell> {
   @override
   void initState() {
     super.initState();
-    // Subscribe to the global pending queue via the provider
     context.read<ApplianceProvider>().subscribeToQueue();
   }
 
@@ -65,7 +65,7 @@ class VerificationQueue extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, size: 64, color: AppTheme.ecoTeal.withOpacity(0.5)),
+            Icon(Icons.check_circle_outline, size: 64, color: AppTheme.ecoTeal.withValues(alpha: 0.5)),
             const SizedBox(height: 16),
             const Text("All Caught Up!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
@@ -79,63 +79,110 @@ class VerificationQueue extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: pending.length,
       itemBuilder: (ctx, i) {
-        final app = pending[i];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        return _VerificationCard(app: pending[i]);
+      },
+    );
+  }
+}
+
+// Extracted to manage "Processing" state per card
+class _VerificationCard extends StatefulWidget {
+  final Appliance app;
+  const _VerificationCard({required this.app});
+
+  @override
+  State<_VerificationCard> createState() => _VerificationCardState();
+}
+
+class _VerificationCardState extends State<_VerificationCard> {
+  bool _isProcessing = false;
+
+  Future<void> _handleAction(BuildContext context, bool isApprove) async {
+    setState(() => _isProcessing = true);
+    final provider = context.read<ApplianceProvider>();
+
+    try {
+      if (isApprove) {
+        await provider.approve(widget.app.ownerId, widget.app.id);
+      } else {
+        await provider.reject(widget.app.ownerId, widget.app.id);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(isApprove ? "Device Approved" : "Application Rejected"),
+          backgroundColor: isApprove ? AppTheme.ecoTeal : Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ));
+      }
+      // Note: The card will automatically be removed from the parent list
+      // because the stream will update, so we don't need to manually remove it.
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Action Failed: $e"),
+          backgroundColor: Colors.red,
+        ));
+        setState(() => _isProcessing = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Status Badge & Type
+            Row(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.amber.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
-                      child: const Text("PENDING REVIEW", style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
-                    ),
-                    const Spacer(),
-                    Text(app.type.toUpperCase(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                  ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4)),
+                  child: const Text("PENDING REVIEW", style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
                 ),
-                const SizedBox(height: 12),
-
-                Text(app.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text("${app.wattage} Watts • ${app.room ?? 'Unknown Room'}", style: const TextStyle(color: Colors.grey)),
-
-                const SizedBox(height: 16),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        provider.reject(app.ownerId, app.id);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Application Rejected")));
-                      },
-                      child: const Text("REJECT", style: TextStyle(color: Colors.red)),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-
-                        provider.approve(app.ownerId, app.id);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("Device Approved"),
-                          backgroundColor: AppTheme.ecoTeal,
-                        ));
-                      },
-                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.ecoTeal),
-                      child: const Text("APPROVE"),
-                    ),
-                  ],
-                )
+                const Spacer(),
+                Text(widget.app.type.toUpperCase(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
               ],
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 12),
+
+            Text(widget.app.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text("${widget.app.wattage} Watts • ${widget.app.room ?? 'Unknown Room'}", style: const TextStyle(color: Colors.grey)),
+
+            const SizedBox(height: 16),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+
+                TextButton(
+                  onPressed: _isProcessing ? null : () => _handleAction(context, false),
+                  child: const Text("REJECT", style: TextStyle(color: Colors.red)),
+                ),
+                const SizedBox(width: 8),
+
+                // Approve Button
+                ElevatedButton(
+                  onPressed: _isProcessing ? null : () => _handleAction(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.ecoTeal,
+                    disabledBackgroundColor: AppTheme.ecoTeal.withValues(alpha: 0.5),
+                  ),
+                  child: _isProcessing
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text("APPROVE"),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
 }

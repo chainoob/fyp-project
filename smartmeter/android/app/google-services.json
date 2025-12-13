@@ -12,7 +12,20 @@
           "package_name": "com.example.smartmeter"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "338592292074-nrbvtbn7uju8hva13bv781qvj7op2udd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.smartmeter",
+            "certificate_hash": "6663032b8d7d0ee3d92546407cc3ec697d8203f3"
+          }
+        },
+        {
+          "client_id": "338592292074-bd48rrq0o0nnila1uu5ron4a5skgb67n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCX9tpZM-7nszCcZTCDqvWZeBRWJ6Ciesk"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "338592292074-bd48rrq0o0nnila1uu5ron4a5skgb67n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "338592292074-g2t6j1886h4j2fij6g3en71ronbkoite.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.smartmeter"
+              }
+            }
+          ]
         }
       }
     }

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:smartmeter/models/app_model.dart';
 import 'package:smartmeter/services/energy_repo.dart';
 
-class AuthProvider extends ChangeNotifier {
+class AuthProvider extends ChangeNotifier{
   final EnergyRepository _repo;
+
   UserProfile? _currentUser;
   bool _isLoading = false;
 
@@ -35,6 +36,10 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _repo.signOut();
+  }
+
+  Future<void> signUp({required String email, required String password, required Map<String, String> additionalData}) async {
+    await _repo.register(email, password);
   }
 }
 
