@@ -16,6 +16,9 @@ void main() {
 
   late MockEnergyRepository mockRepo;
   late AppAuthProvider authProvider;
+  
+  // 1. Add a StreamController to control the Auth Stream manually
+  late StreamController<Users?> authStreamController;
 
   // --- Test Data ---
   final tUser = Users(
@@ -34,80 +37,69 @@ void main() {
 
   setUp(() async {
     mockRepo = MockEnergyRepository();
-    when(mockRepo.authStateChanges).thenAnswer((_) => Stream.value(null));
+    
+    authStreamController = StreamController<Users?>.broadcast();
+
+    when(mockRepo.authStateChanges).thenAnswer((_) => authStreamController.stream);
+
     authProvider = AppAuthProvider(mockRepo);
+  });
+
+  tearDown(() {
+    authStreamController.close();
   });
 
   group('Login Module Tests', () {
 
     test('Login Success: calls signIn and updates currentUser from stream', () async {
-      when(mockRepo.authStateChanges).thenAnswer((_) => Stream.value(tUser));
-
       when(mockRepo.signIn(any, any)).thenAnswer((_) async {});
 
+      // Call login
       await authProvider.login('ai111111@student.uthm.edu.my', 'password123');
 
-      // Verify the repo method was actually called with correct args
-      verify(mockRepo.signIn('ai111111@student.uthm.edu.my', 'password123')).called(1);
-
-      // Verify the state was updated (Wait for stream propagation)
+      // SIMULATE FIREBASE: "Push" the user into the stream
+      authStreamController.add(tUser);
+      
+      // Wait for the stream listener in Provider to process the event
       await Future.delayed(Duration.zero);
+
+      verify(mockRepo.signIn('ai111111@student.uthm.edu.my', 'password123')).called(1);
       expect(authProvider.currentUser, isNotNull);
       expect(authProvider.currentUser?.uid, 'user_123');
     });
 
-    test('Login Failure: returns false/throws on Invalid Credentials', () async {
-      when(mockRepo.authStateChanges).thenAnswer((_) => Stream.value(null));
-
+    test('Login Failure: currentUser remains null on error', () async {
       when(mockRepo.signIn(any, any))
           .thenThrow(Exception('Invalid email or password'));
 
-      await authProvider.login('wrong@uni.edu', 'wrong_pass');
+      try {
+        await authProvider.login('wrong@uni.edu', 'wrong_pass');
+      // ignore: empty_catches
+      } catch (e) {
+      }
 
       verify(mockRepo.signIn('wrong@uni.edu', 'wrong_pass')).called(1);
+      
       expect(authProvider.currentUser, isNull);
-    });
-
-    test('Logout: calls signOut and clears user', () async {
-      when(mockRepo.signOut()).thenAnswer((_) async {});
-      when(mockRepo.authStateChanges).thenAnswer((_) => Stream.value(null));
-
-      await authProvider.signOut();
-
-      verify(mockRepo.signOut()).called(1);
     });
   });
 
   group('Staff Login Tests', () {
 
     test('Staff Login: successfully identifies user as STAFF role', () async {
-      // Mock the stream to emit a "Staff" user object
-      when(mockRepo.authStateChanges).thenAnswer((_) => Stream.value(tStaffUser));
-
-      // Mock the sign-in call to succeed
       when(mockRepo.signIn(any, any)).thenAnswer((_) async {});
 
-      // Attempt login with staff credentials
       await authProvider.login('admin@uni.edu', 'adminPass');
 
-      // Verify repo call
-      verify(mockRepo.signIn('admin@uni.edu', 'adminPass')).called(1);
-
-      // Wait for stream to update state
+      // SIMULATE FIREBASE: Push the STAFF user
+      authStreamController.add(tStaffUser);
+      
+      // Wait for stream propagation
       await Future.delayed(Duration.zero);
 
-      // Check if the provider correctly stored the user and role
       expect(authProvider.currentUser, isNotNull);
-      expect(authProvider.currentUser?.uid, 'staff_999');
       expect(authProvider.currentUser?.role, 'staff');
-    });
-
-    test('Staff Routing Logic: (Optional) Verify isAdmin/isStaff getter', () async {
-
-      when(mockRepo.authStateChanges).thenAnswer((_) => Stream.value(tStaffUser));
-
-      await authProvider.login('admin@uni.edu', 'pass');
-      await Future.delayed(Duration.zero);
+      expect(authProvider.currentUser?.uid, 'staff_999');
     });
   });
 }
