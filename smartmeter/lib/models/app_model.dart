@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // --- USER MODEL ---
-class UserProfile {
+class Users {
   final String uid;
   final String name;
   final String email;
@@ -9,8 +9,9 @@ class UserProfile {
   final String? studentId;
   final String? dormBlock;
   final String? department;
+  final String? photoUrl;
 
-  const UserProfile({
+  const Users({
     required this.uid,
     required this.name,
     required this.email,
@@ -18,11 +19,12 @@ class UserProfile {
     this.studentId,
     this.dormBlock,
     this.department,
+    this.photoUrl
   });
 
-  factory UserProfile.fromFirestore(DocumentSnapshot doc) {
+  factory Users.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return UserProfile(
+    return Users(
       uid: doc.id,
       name: data['displayName'] ?? 'Unknown',
       email: data['email'] ?? '',
@@ -30,6 +32,7 @@ class UserProfile {
       studentId: data['studentId'],
       dormBlock: data['dormBlock'],
       department: data['department'],
+      photoUrl: data['photoUrl']
     );
   }
 }
@@ -58,6 +61,7 @@ class Appliance {
 
   Map<String, dynamic> toMap() {
     return {
+      'ownerId':ownerId,
       'name': name,
       'type': type,
       'wattage': wattage,
@@ -71,11 +75,14 @@ class Appliance {
   factory Appliance.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    final String parentUserId = doc.reference.parent.parent?.id ?? '';
+    String resolvedOwnerId = data['ownerId'] ?? '';
+    if (resolvedOwnerId.isEmpty && doc.reference.parent.parent != null) {
+      resolvedOwnerId = doc.reference.parent.parent!.id;
+    }
 
     return Appliance(
       id: doc.id,
-      ownerId: parentUserId, // Store the owner's ID
+      ownerId: resolvedOwnerId, // <--- LOAD THIS
       name: data['name'] ?? 'Unknown Device',
       type: data['type'] ?? 'other',
       wattage: data['wattage'] ?? 0,

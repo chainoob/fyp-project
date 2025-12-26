@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:smartmeter/routes/app_router.dart';
 import 'package:smartmeter/controllers/provider.dart';
-import 'package:smartmeter/screens/register_screen.dart';
 import '../config/theme.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 String? clientId;
 String? serverClientId;
@@ -19,14 +20,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
-  GoogleSignInAccount? _currentUser;
   bool _isLoading = false;
   String _errorMessage = '';
-
-  final _idCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-
-  static const String _universityDomain = "@student.uthm.edu.my";
 
   @override
   void initState() {
@@ -34,78 +29,49 @@ class _LoginScreenState extends State<LoginScreen> {
     _setupGoogleSignIn();
   }
 
+  final _idCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  static const String _universityDomain = "@student.uthm.edu.my";
+
   Future<void> _setupGoogleSignIn() async {
-    _googleSignIn.authenticationEvents.listen((event) {
-      if (mounted) {
-        setState(() {
-          if (event is GoogleSignInAuthenticationEventSignIn) {
-            _currentUser = event.user;
-            _handleAuthSuccess(event.user);
-          } else if (event is GoogleSignInAuthenticationEventSignOut) {
-            _currentUser = null;
-          }
-        });
-      }
-    }).onError((error) {
-      _handleAuthError(error);
-    });
-
-      await _googleSignIn.initialize(
-        clientId: clientId,
-        serverClientId: serverClientId,
-      );
-
-      _googleSignIn.attemptLightweightAuthentication();
-  }
-
-  Future<void> _handleAuthSuccess(GoogleSignInAccount user) async {
-    try {
-      final GoogleSignInAuthentication auth = user.authentication;
-
-      final String matricNumber = user.email.split('@').first;
-
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RegisterScreen(
-                initialMatric: matricNumber,
-                initialEmail: user.email
-            ),
-          ),
-        );
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Welcome ${user.displayName}!")),
-        );
-      }
-    } catch (e) {
-      setState(() => _errorMessage = "Auth success processing failed: $e");
-    }
+    await _googleSignIn.initialize(
+      clientId: clientId,
+      serverClientId: serverClientId,
+    );
   }
 
   Future<void> _handleGoogleBtnClick() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    final provider = context.read<AppAuthProvider>();
+
     try {
-      await _googleSignIn.authenticate();
-    } catch (error) {
-      _handleAuthError(error);
+      final bool isExistingUser = await provider.googleLogin();
+
+      if (!mounted) return;
+
+      if (isExistingUser) {
+        if (provider.isStaff) {
+          context.go(AppRoutes.staffHome);
+        } else {
+          context.go(AppRoutes.studentHome);
+        }
+      } else {
+        context.push(AppRoutes.register);
+      }
+
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+        });
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  void _handleAuthError(Object e) {
-    setState(() {
-      if (e is GoogleSignInException) {
-        _errorMessage = "Error: ${e.code.name}";
-      } else {
-        _errorMessage = 'Unknown error: $e';
-      }
-      _isLoading = false;
-    });
   }
 
   void _handleLogin() async {
@@ -118,16 +84,26 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      await context.read<AuthProvider>().login(emailToUse, _passCtrl.text);
+      await context.read<AppAuthProvider>().login(emailToUse, _passCtrl.text);
+
+      if (!mounted) return;
+      final provider = context.read<AppAuthProvider>();
+      if (provider.isStaff) {
+        context.go(AppRoutes.staffHome);
+      } else {
+        context.go(AppRoutes.studentHome);
+      }
+
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login Failed: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Login Failed: $e"))
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,8 +120,13 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 48),
 
               if (_errorMessage.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Text(_errorMessage, style: const TextStyle(color: Colors.red)),
                 ),
 

@@ -56,9 +56,9 @@ class AuthWrapper extends StatelessWidget {
             final String role = userData['role'] ?? 'student';
 
             if (role == 'staff') {
-              return const StaffDashboard();
+              return const StaffShell();
             } else {
-              return const StudentDashboard();
+              return const StudentShell();
             }
           },
         );
